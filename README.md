@@ -1,5 +1,5 @@
-# Data Scientist Project pt. 2
-Project code for Udacity's Data Scientist Nanodegree program. 
+# aipnd-project
+Project code for Udacity's Data Scientist Nanodegree program part 2: Create Your Own Image Classifier
 
 Download sample data:
 ```
