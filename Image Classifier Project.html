@@ -13155,7 +13155,8 @@ div#notebook {
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">random</span><span class="o">,</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
@@ -13248,9 +13249,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cat_to_name.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cat_to_name.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">cat_to_name</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </pre></div>
 
@@ -13470,7 +13469,6 @@ div#notebook {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># TODO: Save the checkpoint</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="n">curr_timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">-%H-%M-%S&quot;</span><span class="p">)</span>
 <span class="n">checkpoint</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;classifier&#39;</span> <span class="p">:</span> <span class="n">classifier</span><span class="p">,</span>
               <span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">,</span>
@@ -13565,11 +13563,11 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_image_old</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="c1"># Note for the reviewer: this is the function I previously submitted</span>
     <span class="sd">&#39;&#39;&#39; Scales, crops, and normalizes a PIL image for a PyTorch model,</span>
 <span class="sd">        returns an Numpy array</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="c1"># TODO: Process a PIL image for use in a PyTorch model</span>
     <span class="c1"># Using the same pre-processing done earlier</span>
     <span class="n">img_size</span> <span class="o">=</span> <span class="mi">224</span>
     <span class="n">_mean</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">]</span>
@@ -13580,6 +13578,45 @@ div#notebook {
                                           <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">_mean</span><span class="p">,</span> <span class="n">_std</span><span class="p">)])</span>
     
     <span class="k">return</span> <span class="n">transformations</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Scales, crops, and normalizes a PIL image for a PyTorch model,</span>
+<span class="sd">        returns an Numpy array</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">img_size</span> <span class="o">=</span> <span class="mi">224</span>
+    <span class="n">_mean</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">]</span>
+    <span class="n">_std</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">]</span>
+
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">select_random_pic</span><span class="p">(</span><span class="s1">&#39;valid&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Find ratio between larger and smaller side</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Resize smaller side to 256 and larger side to 256* ratio</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="n">img_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">ratio</span><span class="o">*</span><span class="mi">256</span><span class="p">)))</span>
+
+    <span class="c1"># Crop image so that it&#39;s centered and 224x224</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">crop</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">224</span><span class="p">,</span><span class="mi">224</span><span class="p">))</span>
+
+    <span class="c1"># Convert to numpy array</span>
+    <span class="n">np_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image</span><span class="p">)</span><span class="o">/</span><span class="mi">255</span>
+
+    <span class="c1"># Normalize</span>
+    <span class="n">norm_image</span> <span class="o">=</span> <span class="p">(</span><span class="n">np_image</span> <span class="o">-</span> <span class="n">_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">_std</span>
+    <span class="n">norm_image</span> <span class="o">=</span> <span class="n">norm_image</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">norm_image</span><span class="p">)</span>
 </pre></div>
 
     </div>
